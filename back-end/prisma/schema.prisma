@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int       @id @default(autoincrement())
+  nome           String
+  tipoUser       Boolean
+  email          String
+  endereco       String
+  CPF            BigInt
+  dataNascimento DateTime
+  phone          String
+  posts          Post[]
+  cart           Cart?
+  listFavs       ListFav[]
+  role           Role      @default(USER)
+}
+
+model Post {
+  id             Int             @id @default(autoincrement())
+  rating         Decimal
+  title          String
+  describe       String
+  price          Float
+  methodPagament String
+  estimate       Float
+  location       String
+  category       String
+  owner          User            @relation(fields: [ownerId], references: [id])
+  ownerId        Int
+  carts          PostersOnCart[]
+  listFav        ListFav[]
+}
+
+model Cart {
+  id             Int             @id @default(autoincrement())
+  value          Float
+  methodPagament String
+  user           User            @relation(fields: [userId], references: [id])
+  userId         Int             @unique
+  posters        PostersOnCart[]
+}
+
+model PostersOnCart {
+  post   Post @relation(fields: [postId], references: [id])
+  postId Int
+  cart   Cart @relation(fields: [cartId], references: [id])
+  cartId Int
+
+  @@id([postId, cartId])
+}
+
+model Fav {
+  id          Int       @id @default(autoincrement())
+  listUserFav ListFav[]
+}
+
+model ListFav {
+  user   User @relation(fields: [userId], references: [id])
+  userId Int  @unique
+  favs   Fav  @relation(fields: [favsId], references: [id])
+  favsId Int
+  post   Post @relation(fields: [postId], references: [id])
+  postId Int
+
+  @@id([userId, favsId, postId])
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+
+
